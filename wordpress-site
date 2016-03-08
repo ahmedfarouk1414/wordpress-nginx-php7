@@ -1,6 +1,5 @@
 server {
 	listen 80 default_server;
-	listen [::]:80 default_server ipv6only=on;
 
 	# be sure to set proper root if necessary
 	root /usr/share/nginx/html;
@@ -27,16 +26,19 @@ server {
 	}
 
 	location ~ \.php$ {
+		# depends on the included wordpress/fastcgi_cache.conf
+		fastcgi_cache_bypass $no_cache;
+		fastcgi_no_cache $no_cache;
+		fastcgi_cache WORDPRESS;
+		fastcgi_cache_methods GET HEAD; # Only GET and HEAD methods apply
+		add_header X-Fastcgi-Cache $upstream_cache_status;
+		fastcgi_cache_valid 200 60m;
+
+		# now actually process these php files
 		try_files $uri =404;
 		fastcgi_split_path_info ^(.+\.php)(/.+)$;
 		fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;
 		fastcgi_index index.php;
 		include fastcgi_params;
-
-		# depends on the included wordpress/fastcgi_cache.conf
-		fastcgi_cache_bypass $no_cache;
-		fastcgi_no_cache $no_cache;
-		fastcgi_cache WORDPRESS;
-		fastcgi_cache_valid 200 60m;
 	}
 }
