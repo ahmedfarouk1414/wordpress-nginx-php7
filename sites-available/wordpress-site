@@ -1,4 +1,11 @@
 server {
+	# For directing `www` traffic to the root domain, optional
+	listen 80;
+	server_name www.your_domain.com;
+	return 301 $scheme://your_domain.com$request_uri;
+}
+
+server {
 	listen 80 default_server;
 
 	# be sure to set proper root if necessary
